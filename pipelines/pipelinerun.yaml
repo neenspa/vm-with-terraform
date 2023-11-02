@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: terraform-pipeline-run-vm-with-terraform
+  namespace: gitops-tekton
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  pipelineRef:
+    name: terraform-pipeline-vm-with-terraform
+  workspaces:
+    - name: terraform-variables
+      secret:
+        secretName: terraform-credentials
+    - name: github-secret
+      secret:
+        secretName: git-token
+    - name: terraform-files
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 500Mi

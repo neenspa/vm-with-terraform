@@ -1,0 +1,82 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: tekton-template
+  title: Create a VM with Tekton Pipeline
+  description: Create a VmWare Virtual Machine with Tekton Pipeline
+  tags:
+    - ci
+    - tekton
+    - iac
+spec:
+  owner: neenspa
+  system: janus-idp
+  type: pipelines
+
+  parameters:
+    - title: Provide information about the target Repository
+      required:
+        - orgName
+        - repoName
+      properties:
+        orgName:
+          title: Organization
+          type: string
+        repoName:
+          title: Repository
+          type: string
+    - title: Provide information about the Terraform component
+      required:
+        - workspace
+      properties:
+        workspace:
+          title: Workspace
+          type: string
+          description: Unique name of the Terraform Cloud workspace
+
+  steps:
+    - id: fetchRepo
+      name: Fetch Repo
+      action: fetch:template
+      input:
+        url: ./
+        values:
+          name: 
+          workspace: 
+          repoUrl: github.com//
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        description: This is 
+        repoUrl: github.com?owner=&repo=
+        defaultBranch: main
+        repoVisibility: public
+        gitCommitMessage: "feat(all): first commit"
+
+    - id: create-argocd-resources
+      name: Create ArgoCD Resources
+      action: argocd:create-resources
+      input:
+        appName: 
+        argoInstance: main
+        namespace: "gitops-tekton"
+        repoUrl: 
+        path: ./pipelines
+        projectName: 
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: 
+        catalogInfoPath: "/catalog-info.yaml"
+
+  output:
+    links:
+      - title: Repository
+        url: 
+      - title: Open in catalog
+        icon: catalog
+        entityRef: 

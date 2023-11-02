@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: terraform-vm-with-terraform
+  namespace: gitops-tekton
+spec:
+  workspaces:
+    - description: The workspace consisting of Terraform files
+      name: source
+    - description: The workspace containing tfvars
+      name: terraform-variables
+  steps:
+    - name: init
+      script: |
+        #!/bin/sh
+        terraform init -var-file="$(workspaces.terraform-variables.path)/vsphere"
+      image: "docker.io/hashicorp/terraform:latest"
+      resources: {}
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: TF_TOKEN_app_terraform_io
+          valueFrom:
+            secretKeyRef:
+              name: terraform-credentials
+              key: token
+    - name: apply
+      script: |
+        #!/bin/sh
+        echo $TF_TOKEN_app_terraform_io
+        echo $TF_VAR_vsphere > terraform.tfvars
+        echo $TF_VAR_vm >> terraform.tfvars
+        cat terraform.tfvars
+        terraform apply -auto-approve
+      image: "docker.io/hashicorp/terraform:latest"
+      resources: {}
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: TF_TOKEN_app_terraform_io
+          valueFrom:
+            secretKeyRef:
+              name: terraform-credentials
+              key: token
+        - name: TF_VAR_vsphere
+          valueFrom:
+            secretKeyRef:
+              name: terraform-credentials
+              key: vsphere
+        - name: TF_VAR_vm
+          valueFrom:
+            secretKeyRef:
+              name: terraform-credentials
+              key: vm

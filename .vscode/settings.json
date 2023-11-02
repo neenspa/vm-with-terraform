@@ -1,0 +1,9 @@
+{
+  "terraform.experimentalFeatures.validateOnSave": true,
+  "terraform.codelens.referenceCount": true,
+  "terraform.languageServer.enable": true,
+  "editor.formatOnSave": true,
+  "editor.autoClosingBrackets": "languageDefined",
+  "editor.foldingImportsByDefault": true,
+  "files.autoSave": "onFocusChange"
+}
